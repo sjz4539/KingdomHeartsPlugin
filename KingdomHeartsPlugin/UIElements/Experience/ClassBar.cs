@@ -41,8 +41,8 @@ namespace KingdomHeartsPlugin.UIElements.Experience
 
         public ClassBar()
         {
-            _expBarBaseTexture = KingdomHeartsPlugin.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPlugin.TemplateLocation, @"Textures\Experience\ring_experience_outline.png"));
-            _expBarSegmentTexture = KingdomHeartsPlugin.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPlugin.TemplateLocation, @"Textures\Experience\ring_experience_segment.png"));
+            _expBarBaseTexture = KingdomHeartsPluginDev.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPluginDev.TemplateLocation, @"Textures\Experience\ring_experience_outline.png"));
+            _expBarSegmentTexture = KingdomHeartsPluginDev.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPluginDev.TemplateLocation, @"Textures\Experience\ring_experience_segment.png"));
 
             ExperienceRing = new Ring(_expBarSegmentTexture);
             ExperienceRingRest = new Ring(_expBarSegmentTexture, alpha: 0.25f);
@@ -52,7 +52,7 @@ namespace KingdomHeartsPlugin.UIElements.Experience
 
         private void Update(PlayerCharacter player)
         {
-            _expAddonPtr = KingdomHeartsPlugin.Gui.GetAddonByName("_Exp", 1);
+            _expAddonPtr = KingdomHeartsPluginDev.Gui.GetAddonByName("_Exp", 1);
 
             try
             {
@@ -65,7 +65,7 @@ namespace KingdomHeartsPlugin.UIElements.Experience
             {
                 try
                 {
-                    _expAddonPtr = KingdomHeartsPlugin.Gui.GetAddonByName("_Exp", 1);
+                    _expAddonPtr = KingdomHeartsPluginDev.Gui.GetAddonByName("_Exp", 1);
                 }
                 catch
                 {
@@ -117,72 +117,72 @@ namespace KingdomHeartsPlugin.UIElements.Experience
         {
             if (ExpGainTime > 0)
             {
-                ExpGainTime -= 1 * KingdomHeartsPlugin.UiSpeed;
+                ExpGainTime -= 1 * KingdomHeartsPluginDev.UiSpeed;
             }
             else if (ExpTemp < exp)
             {
-                ExpTemp += (exp - ExpBeforeGain) * KingdomHeartsPlugin.UiSpeed;
+                ExpTemp += (exp - ExpBeforeGain) * KingdomHeartsPluginDev.UiSpeed;
             }
 
             if (ExpTemp > exp)
                 ExpTemp = exp;
         }
 
-        public void Draw(PlayerCharacter player, float healthY)
+        public void Draw(PlayerCharacter player, float yBounce)
         {
             Update(player);
             var drawList = ImGui.GetWindowDrawList();
 
-            int size = (int)Math.Ceiling(256 * KingdomHeartsPlugin.Ui.Configuration.Scale);
-            var drawPosition = ImGui.GetItemRectMin() + new Vector2(0, (int)(healthY * KingdomHeartsPlugin.Ui.Configuration.Scale));
+            int size = (int)Math.Ceiling(256 * KingdomHeartsPluginDev.Ui.Configuration.Scale);
+            var drawPosition = ImGui.GetItemRectMin() + new Vector2(0, (int)(yBounce * KingdomHeartsPluginDev.Ui.Configuration.Scale));
 
-            if (KingdomHeartsPlugin.Ui.Configuration.ExpBarEnabled)
+            if (KingdomHeartsPluginDev.Ui.Configuration.ExpBarEnabled)
             {
 
-                ExperienceRingBg.Draw(drawList, 1, drawPosition, 4, KingdomHeartsPlugin.Ui.Configuration.Scale);
+                ExperienceRingBg.Draw(drawList, 1, drawPosition, 4, KingdomHeartsPluginDev.Ui.Configuration.Scale);
 
-                ExperienceRingRest.Draw(drawList, (Experience + RestedBonusExperience) / (float)MaxExperience, drawPosition, 4, KingdomHeartsPlugin.Ui.Configuration.Scale);
+                ExperienceRingRest.Draw(drawList, (Experience + RestedBonusExperience) / (float)MaxExperience, drawPosition, 4, KingdomHeartsPluginDev.Ui.Configuration.Scale);
 
-                ExperienceRingGain.Draw(drawList, Experience / (float)MaxExperience, drawPosition, 4, KingdomHeartsPlugin.Ui.Configuration.Scale);
+                ExperienceRingGain.Draw(drawList, Experience / (float)MaxExperience, drawPosition, 4, KingdomHeartsPluginDev.Ui.Configuration.Scale);
 
-                ExperienceRing.Draw(drawList, ExpTemp / MaxExperience, drawPosition, 4, KingdomHeartsPlugin.Ui.Configuration.Scale);
+                ExperienceRing.Draw(drawList, ExpTemp / MaxExperience, drawPosition, 4, KingdomHeartsPluginDev.Ui.Configuration.Scale);
 
                 drawList.PushClipRect(drawPosition, drawPosition + new Vector2(size, size));
                 drawList.AddImage(_expBarBaseTexture.ImGuiHandle, drawPosition, drawPosition + new Vector2(size, size));
                 drawList.PopClipRect();
             }
 
-            Portrait.Draw(healthY);
+            Portrait.Draw(yBounce);
 
-            if (KingdomHeartsPlugin.Ui.Configuration.ClassIconEnabled)
+            if (KingdomHeartsPluginDev.Ui.Configuration.ClassIconEnabled)
             {
-                float iconSize = 3f * KingdomHeartsPlugin.Ui.Configuration.Scale;
+                float iconSize = 3f * KingdomHeartsPluginDev.Ui.Configuration.Scale;
 
-                if (KingdomHeartsPlugin.Cs.LocalPlayer is null) return;
+                if (KingdomHeartsPluginDev.Cs.LocalPlayer is null) return;
 
-                ImageDrawing.DrawIcon(drawList, (ushort)(62000 + KingdomHeartsPlugin.Cs.LocalPlayer.ClassJob.Id),
+                ImageDrawing.DrawIcon(drawList, (ushort)(62000 + KingdomHeartsPluginDev.Cs.LocalPlayer.ClassJob.Id),
                     new Vector2(iconSize, iconSize),
                     //new Vector2((int)(size / 2f), (int)(size / 2f + 18 * KingdomHeartsPlugin.Ui.Configuration.Scale)) +
-                    new Vector2(KingdomHeartsPlugin.Ui.Configuration.ClassIconX, KingdomHeartsPlugin.Ui.Configuration.ClassIconY) +
-                    new Vector2(0, (int)(healthY * KingdomHeartsPlugin.Ui.Configuration.Scale)));
+                    new Vector2(KingdomHeartsPluginDev.Ui.Configuration.ClassIconX, KingdomHeartsPluginDev.Ui.Configuration.ClassIconY) +
+                    new Vector2(0, (int)(yBounce * KingdomHeartsPluginDev.Ui.Configuration.Scale)));
             }
 
-            if (KingdomHeartsPlugin.Ui.Configuration.LevelEnabled)
-                ImGuiAdditions.TextShadowedDrawList(drawList, KingdomHeartsPlugin.Ui.Configuration.LevelTextSize,
-                    $"Lv{KingdomHeartsPlugin.Cs.LocalPlayer.Level}",
-                    drawPosition + new Vector2(KingdomHeartsPlugin.Ui.Configuration.LevelTextX, KingdomHeartsPlugin.Ui.Configuration.LevelTextY),
+            if (KingdomHeartsPluginDev.Ui.Configuration.LevelEnabled)
+                ImGuiAdditions.TextShadowedDrawList(drawList, KingdomHeartsPluginDev.Ui.Configuration.LevelTextSize,
+                    $"Lv{KingdomHeartsPluginDev.Cs.LocalPlayer.Level}",
+                    drawPosition + new Vector2(KingdomHeartsPluginDev.Ui.Configuration.LevelTextX, KingdomHeartsPluginDev.Ui.Configuration.LevelTextY),
                     new Vector4(249 / 255f, 247 / 255f, 232 / 255f, 0.9f),
                     new Vector4(96 / 255f, 78 / 255f, 23 / 255f, 0.25f), 3,
-                    KingdomHeartsPlugin.Ui.Configuration.LevelTextAlignment);
+                    KingdomHeartsPluginDev.Ui.Configuration.LevelTextAlignment);
 
-            if (KingdomHeartsPlugin.Ui.Configuration.ExpValueTextEnabled)
-                ImGuiAdditions.TextShadowedDrawList(drawList, KingdomHeartsPlugin.Ui.Configuration.ExpValueTextSize,
-                    $"{StringFormatting.FormatDigits(Experience, (NumberFormatStyle)KingdomHeartsPlugin.Ui.Configuration.ExpValueTextFormatStyle)} / {StringFormatting.FormatDigits(MaxExperience, (NumberFormatStyle)KingdomHeartsPlugin.Ui.Configuration.ExpValueTextFormatStyle)}",
-                    drawPosition + new Vector2(KingdomHeartsPlugin.Ui.Configuration.ExpValueTextPositionX, KingdomHeartsPlugin.Ui.Configuration.ExpValueTextPositionY),
+            if (KingdomHeartsPluginDev.Ui.Configuration.ExpValueTextEnabled)
+                ImGuiAdditions.TextShadowedDrawList(drawList, KingdomHeartsPluginDev.Ui.Configuration.ExpValueTextSize,
+                    $"{StringFormatting.FormatDigits(Experience, (NumberFormatStyle)KingdomHeartsPluginDev.Ui.Configuration.ExpValueTextFormatStyle)} / {StringFormatting.FormatDigits(MaxExperience, (NumberFormatStyle)KingdomHeartsPluginDev.Ui.Configuration.ExpValueTextFormatStyle)}",
+                    drawPosition + new Vector2(KingdomHeartsPluginDev.Ui.Configuration.ExpValueTextPositionX, KingdomHeartsPluginDev.Ui.Configuration.ExpValueTextPositionY),
                     new Vector4(255 / 255f, 255 / 255f, 255 / 255f, 1f),
                     new Vector4(0 / 255f, 0 / 255f, 0 / 255f, 0.25f),
                     3,
-                    (TextAlignment)KingdomHeartsPlugin.Ui.Configuration.ExpValueTextAlignment);
+                    (TextAlignment)KingdomHeartsPluginDev.Ui.Configuration.ExpValueTextAlignment);
         }
 
         public void Dispose()

@@ -17,7 +17,7 @@ using Lumina.Excel.GeneratedSheets;
 
 namespace KingdomHeartsPlugin
 {
-    public sealed class KingdomHeartsPlugin : IDalamudPlugin
+    public sealed class KingdomHeartsPluginDev : IDalamudPlugin
     {
         public string Name => "Kingdom Hearts UI Plugin";
 
@@ -27,7 +27,7 @@ namespace KingdomHeartsPlugin
 
         public static string TemplateLocation;
 
-        public KingdomHeartsPlugin(
+        public KingdomHeartsPluginDev(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
             [RequiredVersion("1.0")] Framework framework,
             [RequiredVersion("1.0")] CommandManager commandManager,

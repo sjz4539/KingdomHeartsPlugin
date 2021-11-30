@@ -15,12 +15,13 @@ namespace KingdomHeartsPlugin.Configuration
 
         #region HP
         public const bool HpBarEnabled  = true;
+        public const int HpBarLength  = 100;
         public const float HpValueTextPositionX  = 26;
         public const float HpValueTextPositionY  = 130;
         public const float HpValueTextSize  = 21;
         public const int HpValueTextAlignment  = 0;
         public const NumberFormatStyle HpValueTextStyle = NumberFormatStyle.NoFormatting;
-        public const float HpDamageWobbleIntensity  = 100f;
+        public const float DamageBounceIntensity  = 100f;
         public const int HpForFullRing  = 60000;
         public const int MaximumHpForMaximumLength  = 120000;
         public const int MinimumHpForLength  = 1000;
@@ -30,6 +31,7 @@ namespace KingdomHeartsPlugin.Configuration
         public const int PvpMinimumHpForLength  = 6666;
         public const float PvpHpPerPixelLongBar  = 33.33f;
         public const float LowHpPercent  = 25f;
+        public const bool ShowHpDamage = true;
         public const bool ShowHpRecovery  = true;
         public const bool ShowHpVal  = true;
         #endregion

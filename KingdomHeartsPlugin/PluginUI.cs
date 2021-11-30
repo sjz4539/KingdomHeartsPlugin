@@ -4,11 +4,11 @@ using ImGuiNET;
 using KingdomHeartsPlugin.Configuration;
 using KingdomHeartsPlugin.Enums;
 using KingdomHeartsPlugin.UIElements.Experience;
-using KingdomHeartsPlugin.UIElements.HealthBar;
 using KingdomHeartsPlugin.Utilities;
 using System;
 using System.Numerics;
 using NAudio.Wave;
+using KingdomHeartsPlugin.UIElements;
 
 namespace KingdomHeartsPlugin
 {
@@ -17,7 +17,7 @@ namespace KingdomHeartsPlugin
     public class PluginUI : IDisposable
     {
         internal Settings Configuration;
-        public readonly HealthFrame HealthFrame;
+        public readonly WidgetFrame WidgetFrame;
         /*private TextureWrap _testTextureWrap;
         private float _width;
         private float _height;
@@ -45,7 +45,7 @@ namespace KingdomHeartsPlugin
         public PluginUI(Settings configuration)
         {
             Configuration = configuration;
-            HealthFrame = new HealthFrame();
+            WidgetFrame = new WidgetFrame();
 
             /*_testTextureWrap = KingdomHeartsPlugin.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPlugin.TemplateLocation, @"Textures\LimitGauge\number_2.png"));
             pos = new float[4];
@@ -58,7 +58,7 @@ namespace KingdomHeartsPlugin
 
         public void Dispose()
         {
-            HealthFrame?.Dispose();
+            WidgetFrame?.Dispose();
             Portrait.Dispose();
             ImageDrawing.Dispose();
             //_testTextureWrap?.Dispose();
@@ -87,7 +87,7 @@ namespace KingdomHeartsPlugin
 
             CheckNpcTalkingVisibility();
 
-            if (!Visible || !KingdomHeartsPlugin.Ui.Configuration.Enabled)
+            if (!Visible || !KingdomHeartsPluginDev.Ui.Configuration.Enabled)
             {
                 return;
             }
@@ -112,17 +112,17 @@ namespace KingdomHeartsPlugin
             
             if (ImGui.Begin("KH Frame", ref visible, window_flags))
             {
-                HealthFrame.Draw();
+                WidgetFrame.Draw();
             }
             ImGui.End();
         }
 
         private unsafe void CheckNpcTalkingVisibility()
         {
-            var actionBarWidget = (AtkUnitBase*)KingdomHeartsPlugin.Gui.GetAddonByName("_ActionBar", 1);
-            var actionCrossWidget = (AtkUnitBase*)KingdomHeartsPlugin.Gui.GetAddonByName("_ActionCross", 1);
+            var actionBarWidget = (AtkUnitBase*)KingdomHeartsPluginDev.Gui.GetAddonByName("_ActionBar", 1);
+            var actionCrossWidget = (AtkUnitBase*)KingdomHeartsPluginDev.Gui.GetAddonByName("_ActionCross", 1);
 
-            if (actionBarWidget == null || actionCrossWidget == null || !KingdomHeartsPlugin.Ui.Configuration.HideWhenNpcTalking) return;
+            if (actionBarWidget == null || actionCrossWidget == null || !KingdomHeartsPluginDev.Ui.Configuration.HideWhenNpcTalking) return;
 
             if (!actionBarWidget->IsVisible && !actionCrossWidget->IsVisible)
                 Visible = false;
@@ -218,162 +218,23 @@ namespace KingdomHeartsPlugin
             }
             ImGui.NewLine();
             ImGui.Separator();
-            ImGui.Text("Length");
+            ImGui.Text("Bar Length");
             ImGui.Separator();
-            if (ImGui.TreeNode("Standard"))
+
+            var hpBarLength = Configuration.HpBarLength;
+            if (ImGui.SliderInt("HP bar length", ref hpBarLength, 5, 4000))
             {
-                ImGui.BeginGroup();
-
-                var fullRing = Configuration.HpForFullRing;
-                if (ImGui.InputInt("HP for full ring", ref fullRing, 5, 50))
-                {
-                    Configuration.HpForFullRing = fullRing;
-                    if (Configuration.HpForFullRing < 1)
-                        Configuration.HpForFullRing = 1;
-                }
-
-                if (ImGui.IsItemHovered())
-                {
-                    Vector2 m = ImGui.GetIO().MousePos;
-                    ImGui.SetNextWindowPos(new Vector2(m.X + 20, m.Y + 20));
-                    ImGui.Begin("KHTT", ImGuiWindowFlags.Tooltip | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
-                    ImGui.Text($"How much HP will make the ring max out, then goes long bar.\n\nDefault: {Defaults.HpForFullRing}");
-                    ImGui.End();
-                }
-
-                var hpPerPixel = Configuration.HpPerPixelLongBar;
-                if (ImGui.InputFloat("HP per pixel for long bar", ref hpPerPixel, 5, 50))
-                {
-                    Configuration.HpPerPixelLongBar = hpPerPixel;
-                    if (Configuration.HpPerPixelLongBar < 0.0001f)
-                        Configuration.HpPerPixelLongBar = 0.0001f;
-                }
-
-                if (ImGui.IsItemHovered())
-                {
-                    Vector2 m = ImGui.GetIO().MousePos;
-                    ImGui.SetNextWindowPos(new Vector2(m.X + 20, m.Y + 20));
-                    ImGui.Begin("KHTT", ImGuiWindowFlags.Tooltip | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
-                    ImGui.Text($"Defines the width of the long bar.\n100 would mean that every 100 HP over the value set for HP for full ring, the bar is 1 pixel wider.\n\nDefault: {Defaults.HpPerPixelLongBar}");
-                    ImGui.End();
-                }
-
-                var maxLength = Configuration.MaximumHpForMaximumLength;
-                if (ImGui.InputInt("Max HP for maximum total length", ref maxLength, 5, 50))
-                {
-                    Configuration.MaximumHpForMaximumLength = maxLength;
-                    if (Configuration.MaximumHpForMaximumLength < 1)
-                        Configuration.MaximumHpForMaximumLength = 1;
-                }
-
-                if (ImGui.IsItemHovered())
-                {
-                    Vector2 m = ImGui.GetIO().MousePos;
-                    ImGui.SetNextWindowPos(new Vector2(m.X + 20, m.Y + 20));
-                    ImGui.Begin("KHTT", ImGuiWindowFlags.Tooltip | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
-                    ImGui.Text(
-                        $"Defines when the total bar size, including the ring, will stop getting larger.\n10000 would make the bar stop getting longer at 10000 MaxHP. Prevents an HP bar that's too big.\n\nDefault: {Defaults.MaximumHpForMaximumLength}");
-                    ImGui.End();
-                }
-
-                var minLength = Configuration.MinimumHpForLength;
-                if (ImGui.InputInt("Max HP for minimum length", ref minLength, 5, 50))
-                {
-                    Configuration.MinimumHpForLength = minLength;
-                    if (Configuration.MinimumHpForLength < 1)
-                        Configuration.MinimumHpForLength = 1;
-                }
-
-                if (ImGui.IsItemHovered())
-                {
-                    Vector2 m = ImGui.GetIO().MousePos;
-                    ImGui.SetNextWindowPos(new Vector2(m.X + 20, m.Y + 20));
-                    ImGui.Begin("KHTT", ImGuiWindowFlags.Tooltip | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
-                    ImGui.Text(
-                        $"Defines when the total bar size, including the ring, will stop getting smaller.\n1000 would make the bar stop getting smaller at 1000 MaxHP. Prevents an HP bar that's too small.\n\nDefault: {Defaults.MinimumHpForLength}");
-                    ImGui.End();
-                }
-                ImGui.EndGroup();
-                ImGui.TreePop();
+                Configuration.HpBarLength = hpBarLength;
+                Configuration.HpBarLength = Math.Max(5, Math.Min(4000, Configuration.HpBarLength));
             }
 
-
-            if (ImGui.TreeNode("PvP"))
+            if (ImGui.IsItemHovered())
             {
-                ImGui.BeginGroup();
-
-                var fullRing = Configuration.PvpHpForFullRing;
-                if (ImGui.InputInt("HP for full ring", ref fullRing, 5, 50))
-                {
-                    Configuration.PvpHpForFullRing = fullRing;
-                    if (Configuration.PvpHpForFullRing < 1)
-                        Configuration.PvpHpForFullRing = 1;
-                }
-
-                if (ImGui.IsItemHovered())
-                {
-                    Vector2 m = ImGui.GetIO().MousePos;
-                    ImGui.SetNextWindowPos(new Vector2(m.X + 20, m.Y + 20));
-                    ImGui.Begin("KHTT", ImGuiWindowFlags.Tooltip | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
-                    ImGui.Text($"How much HP will make the ring max out, then goes long bar.\n\nDefault: {Defaults.PvpHpForFullRing}");
-                    ImGui.End();
-                }
-
-                var hpPerPixel = Configuration.PvpHpPerPixelLongBar;
-                if (ImGui.InputFloat("HP per pixel for long bar", ref hpPerPixel, 5, 50))
-                {
-                    Configuration.PvpHpPerPixelLongBar = hpPerPixel;
-                    if (Configuration.PvpHpPerPixelLongBar < 0.0001f)
-                        Configuration.PvpHpPerPixelLongBar = 0.0001f;
-                }
-
-                if (ImGui.IsItemHovered())
-                {
-                    Vector2 m = ImGui.GetIO().MousePos;
-                    ImGui.SetNextWindowPos(new Vector2(m.X + 20, m.Y + 20));
-                    ImGui.Begin("KHTT", ImGuiWindowFlags.Tooltip | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
-                    ImGui.Text($"Defines the width of the long bar.\n100 would mean that every 100 HP over the value set for HP for full ring, the bar is 1 pixel wider.\n\nDefault: {Defaults.PvpHpPerPixelLongBar}");
-                    ImGui.End();
-                }
-
-                var maxLength = Configuration.PvpMaximumHpForMaximumLength;
-                if (ImGui.InputInt("Max HP for maximum total length", ref maxLength, 5, 50))
-                {
-                    Configuration.PvpMaximumHpForMaximumLength = maxLength;
-                    if (Configuration.PvpMaximumHpForMaximumLength < 1)
-                        Configuration.PvpMaximumHpForMaximumLength = 1;
-                }
-
-                if (ImGui.IsItemHovered())
-                {
-                    Vector2 m = ImGui.GetIO().MousePos;
-                    ImGui.SetNextWindowPos(new Vector2(m.X + 20, m.Y + 20));
-                    ImGui.Begin("KHTT", ImGuiWindowFlags.Tooltip | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
-                    ImGui.Text(
-                        $"Defines when the total bar size, including the ring, will stop getting larger.\n10000 would make the bar stop getting longer at 10000 MaxHP. Prevents an HP bar that's too big.\n\nDefault: {Defaults.PvpMaximumHpForMaximumLength}");
-                    ImGui.End();
-                }
-
-                var minLength = Configuration.PvpMinimumHpForLength;
-                if (ImGui.InputInt("Max HP for minimum length", ref minLength, 5, 50))
-                {
-                    Configuration.PvpMinimumHpForLength = minLength;
-                    if (Configuration.PvpMinimumHpForLength < 1)
-                        Configuration.PvpMinimumHpForLength = 1;
-                }
-
-                if (ImGui.IsItemHovered())
-                {
-                    Vector2 m = ImGui.GetIO().MousePos;
-                    ImGui.SetNextWindowPos(new Vector2(m.X + 20, m.Y + 20));
-                    ImGui.Begin("KHTT", ImGuiWindowFlags.Tooltip | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
-                    ImGui.Text(
-                        $"Defines when the total bar size, including the ring, will stop getting smaller.\n1000 would make the bar stop getting smaller at 1000 MaxHP. Prevents an HP bar that's too small.\n\nDefault: {Defaults.PvpMinimumHpForLength}");
-                    ImGui.End();
-                }
-
-                ImGui.EndGroup();
-                ImGui.TreePop();
+                Vector2 m = ImGui.GetIO().MousePos;
+                ImGui.SetNextWindowPos(new Vector2(m.X + 20, m.Y + 20));
+                ImGui.Begin("KHTT", ImGuiWindowFlags.Tooltip | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
+                ImGui.Text($"Length of straight section of HP bar, in pixels.\n\nDefault: {Defaults.HpBarLength}");
+                ImGui.End();
             }
 
             ImGui.Separator();
@@ -446,10 +307,10 @@ namespace KingdomHeartsPlugin
                 Configuration.LowHpPercent = lowHpPercent;
             }
 
-            var hpDamageWobbleIntensity = Configuration.HpDamageWobbleIntensity;
-            if (ImGui.SliderFloat("Damage wobble intensity %", ref hpDamageWobbleIntensity, 0, 200))
+            var hpDamageBounceIntensity = Configuration.DamageBounceIntensity;
+            if (ImGui.SliderFloat("Damage bounce intensity %", ref hpDamageBounceIntensity, 0, 200))
             {
-                Configuration.HpDamageWobbleIntensity = hpDamageWobbleIntensity;
+                Configuration.DamageBounceIntensity = hpDamageBounceIntensity;
             }
 
             var showHpRecovery = Configuration.ShowHpRecovery;
@@ -463,6 +324,20 @@ namespace KingdomHeartsPlugin
                 ImGui.SetNextWindowPos(new Vector2(m.X + 20, m.Y + 20));
                 ImGui.Begin("TT2", ImGuiWindowFlags.Tooltip | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
                 ImGui.Text("Shows a blue bar for when HP is recovered then gradually fills the green bar.");
+                ImGui.End();
+            }
+
+            var showHpDamage = Configuration.ShowHpDamage;
+            if (ImGui.Checkbox("Show HP Damage", ref showHpDamage))
+            {
+                Configuration.ShowHpDamage = showHpDamage;
+            }
+            if (ImGui.IsItemHovered())
+            {
+                Vector2 m = ImGui.GetIO().MousePos;
+                ImGui.SetNextWindowPos(new Vector2(m.X + 20, m.Y + 20));
+                ImGui.Begin("TT2", ImGuiWindowFlags.Tooltip | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar);
+                ImGui.Text("Shows a red bar segment for when HP is lost.");
                 ImGui.End();
             }
 

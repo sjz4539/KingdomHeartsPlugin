@@ -13,7 +13,7 @@ namespace KingdomHeartsPlugin.Utilities
         {
             if (path.IsNullOrEmpty() || !File.Exists(path)) return;
 
-            var soundDevice = KingdomHeartsPlugin.Ui.Configuration.SoundDeviceId;
+            var soundDevice = KingdomHeartsPluginDev.Ui.Configuration.SoundDeviceId;
             if (soundDevice < -1 || soundDevice > WaveOut.DeviceCount)
             {
                 soundDevice = -1;

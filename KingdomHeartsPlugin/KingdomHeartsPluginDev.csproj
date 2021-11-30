@@ -58,7 +58,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <None Update="KingdomHeartsPlugin.json">
+    <None Update="KingdomHeartsPluginDev.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Textures\bar_textures.png">

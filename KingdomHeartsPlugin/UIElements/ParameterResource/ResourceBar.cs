@@ -22,10 +22,10 @@ namespace KingdomHeartsPlugin.UIElements.ParameterResource
 
         public ResourceBar()
         {
-            _barBackgroundTexture = KingdomHeartsPlugin.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPlugin.TemplateLocation, @"Textures\ResourceBar\background.png"));
-            _barForegroundTexture = KingdomHeartsPlugin.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPlugin.TemplateLocation, @"Textures\ResourceBar\foreground.png"));
-            _mpBaseTexture = KingdomHeartsPlugin.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPlugin.TemplateLocation, @"Textures\ResourceBar\MP_base.png"));
-            _barEdgeTexture = KingdomHeartsPlugin.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPlugin.TemplateLocation, @"Textures\ResourceBar\edge.png"));
+            _barBackgroundTexture = KingdomHeartsPluginDev.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPluginDev.TemplateLocation, @"Textures\ResourceBar\background.png"));
+            _barForegroundTexture = KingdomHeartsPluginDev.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPluginDev.TemplateLocation, @"Textures\ResourceBar\foreground.png"));
+            _mpBaseTexture = KingdomHeartsPluginDev.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPluginDev.TemplateLocation, @"Textures\ResourceBar\MP_base.png"));
+            _barEdgeTexture = KingdomHeartsPluginDev.Pi.UiBuilder.LoadImage(Path.Combine(KingdomHeartsPluginDev.TemplateLocation, @"Textures\ResourceBar\edge.png"));
         }
 
         public void Update(PlayerCharacter player)
@@ -40,9 +40,9 @@ namespace KingdomHeartsPlugin.UIElements.ParameterResource
                 ResourceMax = player.MaxMp;
                 ResourceType = Resource.Mp;
 
-                minLength = KingdomHeartsPlugin.Ui.Configuration.MinimumMpLength;
-                maxLength = KingdomHeartsPlugin.Ui.Configuration.MaximumMpLength;
-                lengthRate = KingdomHeartsPlugin.Ui.Configuration.MpPerPixelLength;
+                minLength = KingdomHeartsPluginDev.Ui.Configuration.MinimumMpLength;
+                maxLength = KingdomHeartsPluginDev.Ui.Configuration.MaximumMpLength;
+                lengthRate = KingdomHeartsPluginDev.Ui.Configuration.MpPerPixelLength;
             }
             else if (player.MaxCp > 0)
             {
@@ -50,9 +50,9 @@ namespace KingdomHeartsPlugin.UIElements.ParameterResource
                 ResourceMax = player.MaxCp;
                 ResourceType = Resource.Cp;
 
-                minLength = KingdomHeartsPlugin.Ui.Configuration.MinimumCpLength;
-                maxLength = KingdomHeartsPlugin.Ui.Configuration.MaximumCpLength;
-                lengthRate = KingdomHeartsPlugin.Ui.Configuration.CpPerPixelLength;
+                minLength = KingdomHeartsPluginDev.Ui.Configuration.MinimumCpLength;
+                maxLength = KingdomHeartsPluginDev.Ui.Configuration.MaximumCpLength;
+                lengthRate = KingdomHeartsPluginDev.Ui.Configuration.CpPerPixelLength;
             }
             else if (player.MaxGp > 0)
             {
@@ -60,9 +60,9 @@ namespace KingdomHeartsPlugin.UIElements.ParameterResource
                 ResourceMax = player.MaxGp;
                 ResourceType = Resource.Gp;
 
-                minLength = KingdomHeartsPlugin.Ui.Configuration.MinimumGpLength;
-                maxLength = KingdomHeartsPlugin.Ui.Configuration.MaximumGpLength;
-                lengthRate = KingdomHeartsPlugin.Ui.Configuration.GpPerPixelLength;
+                minLength = KingdomHeartsPluginDev.Ui.Configuration.MinimumGpLength;
+                maxLength = KingdomHeartsPluginDev.Ui.Configuration.MaximumGpLength;
+                lengthRate = KingdomHeartsPluginDev.Ui.Configuration.GpPerPixelLength;
             }
 
             var lengthMultiplier = ResourceMax < minLength ? minLength / (float)ResourceMax : ResourceMax > maxLength ? (float)maxLength / ResourceMax : 1f;
@@ -70,12 +70,12 @@ namespace KingdomHeartsPlugin.UIElements.ParameterResource
             ResourceLength = (int)Math.Ceiling(ResourceValue / lengthRate * lengthMultiplier);
         }
 
-        public void Draw(PlayerCharacter player)
+        public void Draw(PlayerCharacter player, float yBounce)
         {
             Update(player);
             var drawList = ImGui.GetWindowDrawList();
-            var basePosition =  new Vector2(KingdomHeartsPlugin.Ui.Configuration.ResourceBarPositionX, KingdomHeartsPlugin.Ui.Configuration.ResourceBarPositionY);
-            var textPosition = new Vector2(KingdomHeartsPlugin.Ui.Configuration.ResourceTextPositionX, KingdomHeartsPlugin.Ui.Configuration.ResourceTextPositionY) * KingdomHeartsPlugin.Ui.Configuration.Scale;
+            var basePosition =  new Vector2(KingdomHeartsPluginDev.Ui.Configuration.ResourceBarPositionX, KingdomHeartsPluginDev.Ui.Configuration.ResourceBarPositionY);
+            var textPosition = new Vector2(KingdomHeartsPluginDev.Ui.Configuration.ResourceTextPositionX, KingdomHeartsPluginDev.Ui.Configuration.ResourceTextPositionY) * KingdomHeartsPluginDev.Ui.Configuration.Scale;
 
             // Base
             ImageDrawing.DrawImage(drawList, _mpBaseTexture, new Vector2(basePosition.X - 1, basePosition.Y - 1), new Vector4(0, 0, 74 / 80f, 1));
@@ -88,11 +88,12 @@ namespace KingdomHeartsPlugin.UIElements.ParameterResource
 
             // Edge
             ImageDrawing.DrawImage(drawList, _barEdgeTexture, new Vector2(basePosition.X - MaxResourceLength - 6, basePosition.Y - 1));
+
             // Base Edge
             ImageDrawing.DrawImageRotated(drawList, _barEdgeTexture, new Vector2(basePosition.X + 74, basePosition.Y + 15), new Vector2(_barEdgeTexture.Width, _barEdgeTexture.Height), (float)Math.PI);
 
-            if (KingdomHeartsPlugin.Ui.Configuration.ShowResourceVal)
-                ImGuiAdditions.TextShadowedDrawList(drawList, KingdomHeartsPlugin.Ui.Configuration.ResourceTextSize, $"{StringFormatting.FormatDigits(KingdomHeartsPlugin.Ui.Configuration.TruncateMp && ResourceType == Resource.Mp ? ResourceValue / 100 : ResourceValue, KingdomHeartsPlugin.Ui.Configuration.ResourceTextStyle)}", ImGui.GetItemRectMin() + basePosition * KingdomHeartsPlugin.Ui.Configuration.Scale + textPosition, new Vector4(255 / 255f, 255 / 255f, 255 / 255f, 1f), new Vector4(0 / 255f, 0 / 255f, 0 / 255f, 0.25f), 3, (TextAlignment)KingdomHeartsPlugin.Ui.Configuration.ResourceTextAlignment);
+            if (KingdomHeartsPluginDev.Ui.Configuration.ShowResourceVal)
+                ImGuiAdditions.TextShadowedDrawList(drawList, KingdomHeartsPluginDev.Ui.Configuration.ResourceTextSize, $"{StringFormatting.FormatDigits(KingdomHeartsPluginDev.Ui.Configuration.TruncateMp && ResourceType == Resource.Mp ? ResourceValue / 100 : ResourceValue, KingdomHeartsPluginDev.Ui.Configuration.ResourceTextStyle)}", ImGui.GetItemRectMin() + basePosition * KingdomHeartsPluginDev.Ui.Configuration.Scale + textPosition, new Vector4(255 / 255f, 255 / 255f, 255 / 255f, 1f), new Vector4(0 / 255f, 0 / 255f, 0 / 255f, 0.25f), 3, (TextAlignment)KingdomHeartsPluginDev.Ui.Configuration.ResourceTextAlignment);
         }
 
         public void Dispose()
